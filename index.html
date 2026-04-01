@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relationship Practice</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 600px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
+
+    /* Header */
+    #header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c8960c, #f0b429);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    #header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    #header p {
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    #reset-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid #e5e7eb;
+      color: #6b7280;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    #reset-btn:hover { border-color: #d1d5db; color: #374151; }
+
+    /* Messages */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message { display: flex; flex-direction: column; max-width: 75%; }
+    .message.her { align-self: flex-start; }
+    .message.him { align-self: flex-end; }
+
+    .sender {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      margin-bottom: 3px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .him .sender { text-align: right; }
+
+    .bubble {
+      padding: 11px 15px;
+      border-radius: 18px;
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+
+    .her .bubble {
+      background: #f5c842;
+      color: #1a1a1a;
+      border-bottom-left-radius: 4px;
+    }
+
+    .him .bubble {
+      background: #2563eb;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Typing dots */
+    .typing-bubble {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+      min-width: 60px;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      background: #92400e;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+      opacity: 0.5;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* Controls */
+    #controls {
+      padding: 16px 20px 24px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #status {
+      font-size: 0.82rem;
+      color: #6b7280;
+      height: 18px;
+      text-align: center;
+    }
+
+    #status.listening { color: #dc2626; font-weight: 600; }
+    #status.thinking { color: #6b7280; }
+    #status.speaking { color: #d97706; font-weight: 500; }
+
+    #mic-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+    }
+    #mic-btn:hover { border-color: #2563eb; background: #eff6ff; }
+    #mic-btn.listening {
+      background: #dc2626;
+      border-color: #dc2626;
+      animation: pulse 1.5s infinite;
+    }
+    #mic-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+    }
+
+    .mic-icon { width: 26px; height: 26px; }
+    .mic-icon path, .mic-icon rect { transition: fill 0.2s; }
+    #mic-btn.listening .mic-icon path,
+    #mic-btn.listening .mic-icon rect { fill: #ffffff; }
+
+    /* Text input row */
+    #text-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    #text-input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 22px;
+      border: 1.5px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #111827;
+      outline: none;
+    }
+    #text-input:focus { border-color: #2563eb; background: #fff; }
+    #text-input::placeholder { color: #9ca3af; }
+
+    #send-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    #send-btn:hover { background: #1d4ed8; }
+    #send-btn:disabled { background: #d1d5db; cursor: default; }
+
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div id="header">
+    <div id="avatar">💍</div>
+    <div>
+      <h2>Practice Session</h2>
+      <p id="header-sub">Ready when you are</p>
+    </div>
+    <button id="reset-btn" onclick="resetChat()">Start Over</button>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="controls">
+    <div id="status">Tap the mic to speak</div>
+
+    <button id="mic-btn" onclick="toggleMic()">
+      <svg class="mic-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="9" y="2" width="6" height="12" rx="3" fill="#374151"/>
+        <path d="M5 11C5 14.866 8.13401 18 12 18C15.866 18 19 14.866 19 11" stroke="#374151" stroke-width="2" stroke-linecap="round"/>
+        <line x1="12" y1="18" x2="12" y2="22" stroke="#374151" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="22" x2="15" y2="22" stroke="#374151" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <div id="text-row">
+      <input type="text" id="text-input" placeholder="Or type here..." onkeydown="handleKey(event)" />
+      <button id="send-btn" onclick="sendText()">&#10148;</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let history = [];
+  let isProcessing = false;
+  let recognition = null;
+  let isListening = false;
+
+  const openers = [
+    "I didn't think you'd actually show up.",
+    "Okay. I'm listening. But I need you to know that I've been here before—you wanting to talk, things feeling urgent—and then nothing changes. So I'm not going to pretend this feels different yet.",
+    "I don't really know what you want me to say. I've already said everything I have to say.",
+    "You can sit down. I'm not going to fight. I'm just... tired. Of all of it.",
+    "I told myself I'd hear you out. So I'm here. That's all I can promise right now.",
+    "I don't know why you're here. I mean, I know what you'll say. I just don't know if I believe it anymore.",
+  ];
+
+  // Init speech recognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      stopListening();
+      handleUserMessage(text);
+    };
+
+    recognition.onerror = () => stopListening();
+    recognition.onend = () => {
+      if (isListening) stopListening();
+    };
+  }
+
+  function toggleMic() {
+    if (isProcessing) return;
+    if (isListening) {
+      recognition.stop();
+      stopListening();
+    } else {
+      startListening();
+    }
+  }
+
+  function startListening() {
+    if (!recognition) { alert('Speech recognition not supported. Please use Chrome.'); return; }
+    isListening = true;
+    recognition.start();
+    document.getElementById('mic-btn').classList.add('listening');
+    setStatus('Listening...', 'listening');
+  }
+
+  function stopListening() {
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    setStatus('Tap the mic to speak', '');
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter') sendText();
+  }
+
+  function sendText() {
+    const input = document.getElementById('text-input');
+    const text = input.value.trim();
+    if (!text || isProcessing) return;
+    input.value = '';
+    handleUserMessage(text);
+  }
+
+  async function handleUserMessage(text) {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    addBubble('him', text);
+    history.push({ role: 'user', content: text });
+
+    setStatus('Thinking...', 'thinking');
+    setMicDisabled(true);
+    showTyping();
+
+    try {
+      // Get Claude response
+      const chatRes = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+      const chatData = await chatRes.json();
+      const reply = chatData.content[0].text;
+
+      history.push({ role: 'assistant', content: reply });
+      removeTyping();
+      addBubble('her', reply);
+
+      // Speak the response
+      setStatus('Speaking...', 'speaking');
+      await speak(reply);
+
+    } catch (err) {
+      removeTyping();
+      addBubble('her', '[Something went wrong. Try again.]');
+    }
+
+    setStatus('Tap the mic to speak', '');
+    setMicDisabled(false);
+    isProcessing = false;
+  }
+
+  async function speak(text) {
+    const res = await fetch('/api/speak', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    return new Promise(resolve => {
+      const audio = new Audio(url);
+      audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
+      audio.onerror = resolve;
+      audio.play();
+    });
+  }
+
+  function addBubble(who, text) {
+    const messages = document.getElementById('messages');
+    const wrap = document.createElement('div');
+    wrap.className = `message ${who}`;
+
+    const label = document.createElement('div');
+    label.className = 'sender';
+    label.textContent = who === 'her' ? 'Her' : 'You';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    messages.appendChild(wrap);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function showTyping() {
+    const messages = document.getElementById('messages');
+    const wrap = document.createElement('div');
+    wrap.className = 'message her';
+    wrap.id = 'typing';
+
+    const label = document.createElement('div');
+    label.className = 'sender';
+    label.textContent = 'Her';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble typing-bubble';
+    bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    messages.appendChild(wrap);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typing');
+    if (el) el.remove();
+  }
+
+  function setStatus(text, cls) {
+    const el = document.getElementById('status');
+    el.textContent = text;
+    el.className = cls;
+  }
+
+  function setMicDisabled(val) {
+    document.getElementById('mic-btn').disabled = val;
+    document.getElementById('send-btn').disabled = val;
+    document.getElementById('text-input').disabled = val;
+  }
+
+  function resetChat() {
+    history = [];
+    document.getElementById('messages').innerHTML = '';
+    isProcessing = false;
+    setMicDisabled(false);
+    setStatus('Tap the mic to speak', '');
+    init();
+  }
+
+  async function init() {
+    const opener = openers[Math.floor(Math.random() * openers.length)];
+    addBubble('her', opener);
+    history.push({ role: 'assistant', content: opener });
+    setStatus('Speaking...', 'speaking');
+    setMicDisabled(true);
+    await speak(opener);
+    setStatus('Tap the mic to speak', '');
+    setMicDisabled(false);
+  }
+
+  init();
+</script>
+</body>
+</html>
