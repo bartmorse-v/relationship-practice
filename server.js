@@ -3,9 +3,9 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
-const ELEVENLABS_KEY = process.env.ELEVENLABS_KEY;
-const VOICE_ID = process.env.VOICE_ID;
+const ANTHROPIC_KEY = (process.env.ANTHROPIC_KEY || '').trim();
+const ELEVENLABS_KEY = (process.env.ELEVENLABS_KEY || '').trim();
+const VOICE_ID = (process.env.VOICE_ID || '').trim();
 
 const PORT = process.env.PORT || 3000;
 
