@@ -3,9 +3,9 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const ANTHROPIC_KEY = (process.env.ANTHROPIC_KEY || '').trim();
-const ELEVENLABS_KEY = (process.env.ELEVENLABS_KEY || '').trim();
-const VOICE_ID = (process.env.VOICE_ID || '').trim();
+const ANTHROPIC_KEY = (process.env.ANTHROPIC_KEY || '').replace(/[^\x20-\x7E]/g, '').trim();
+const ELEVENLABS_KEY = (process.env.ELEVENLABS_KEY || '').replace(/[^\x20-\x7E]/g, '').trim();
+const VOICE_ID = (process.env.VOICE_ID || '').replace(/[^\x20-\x7E]/g, '').trim();
 
 const PORT = process.env.PORT || 3000;
 
@@ -174,4 +174,7 @@ http.createServer((req, res) => {
 
 }).listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`ANTHROPIC_KEY set: ${ANTHROPIC_KEY ? 'YES (' + ANTHROPIC_KEY.length + ' chars)' : 'NO'}`);
+  console.log(`ELEVENLABS_KEY set: ${ELEVENLABS_KEY ? 'YES (' + ELEVENLABS_KEY.length + ' chars)' : 'NO'}`);
+  console.log(`VOICE_ID set: ${VOICE_ID ? 'YES (' + VOICE_ID.length + ' chars)' : 'NO'}`);
 });
